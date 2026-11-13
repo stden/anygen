@@ -1,0 +1,45 @@
+name: Codev BDD Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  behave-tests:
+    name: Run Behave BDD Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system behave pytest pytest-bdd pytest-cov
+
+    - name: Run Behave BDD Tests
+      run: |
+        uv run behave features --no-capture --no-capture-stderr --format=progress --format=pretty --color --lang=ru --tags="~@requires-zen-mcp"
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: behave-test-results
+        path: |
+          test-reports/
+          *.output
+        retention-days: 7

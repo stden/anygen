@@ -1,0 +1,9 @@
+[tools]
+python = "3.11"
+uv = "0.13.7"
+
+[tasks.check]
+run = "git diff --check"
+
+[tasks.test]
+run = "uv run pytest"
